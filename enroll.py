@@ -19,15 +19,32 @@ from db import EmbeddingDB
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 
-def main():
-    config.KNOWN_FACES_DIR.mkdir(exist_ok=True)
-    config.LOGS_DIR.mkdir(exist_ok=True)
+def embed_image(app: FaceAnalysis, image_bgr: np.ndarray) -> np.ndarray | None:
+    """Return the L2-normalized embedding for the largest face in the image, or None."""
+    faces = app.get(image_bgr)
+    if not faces:
+        return None
+    faces.sort(
+        key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]),
+        reverse=True,
+    )
+    return faces[0].normed_embedding
 
+
+def build_face_analysis() -> FaceAnalysis:
     app = FaceAnalysis(
         name=config.INSIGHTFACE_MODEL,
         providers=["CPUExecutionProvider"],
     )
     app.prepare(ctx_id=0, det_size=config.DET_SIZE, det_thresh=config.DET_THRESHOLD)
+    return app
+
+
+def main():
+    config.KNOWN_FACES_DIR.mkdir(exist_ok=True)
+    config.LOGS_DIR.mkdir(exist_ok=True)
+
+    app = build_face_analysis()
 
     db = EmbeddingDB(config.DB_PATH)
     db.names = []
@@ -51,15 +68,11 @@ def main():
             if img is None:
                 print(f"  ! cannot read {img_path}")
                 continue
-            faces = app.get(img)
-            if not faces:
+            emb = embed_image(app, img)
+            if emb is None:
                 print(f"  ! no face found in {img_path.name}")
                 continue
-            faces.sort(
-                key=lambda f: (f.bbox[2] - f.bbox[0]) * (f.bbox[3] - f.bbox[1]),
-                reverse=True,
-            )
-            db.add(name, faces[0].normed_embedding)
+            db.add(name, emb)
             n_added += 1
         print(f"  {name}: enrolled {n_added} image(s)")
         total += n_added

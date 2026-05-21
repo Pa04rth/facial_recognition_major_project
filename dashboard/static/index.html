@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>face-recog — live monitor</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Live Monitor</h1>
+  <div class="conn-form">
+    <input id="pi-url" type="text" placeholder="https://xyz.trycloudflare.com">
+    <input id="pi-token" type="password" placeholder="bearer token">
+    <button id="connect-btn">Connect</button>
+    <button id="disconnect-btn" class="ghost">Disconnect</button>
+  </div>
+  <div id="status" class="status disconnected">disconnected</div>
+</header>
+
+<main>
+  <section class="video-pane">
+    <div id="video-placeholder" class="placeholder">no stream — connect to a Pi</div>
+    <img id="stream" alt="" hidden>
+  </section>
+
+  <aside class="match-feed">
+    <h2>Live Matches</h2>
+    <div id="match-list"></div>
+  </aside>
+</main>
+
+<section class="enroll-pane">
+  <h2>Search List (people the Pi is looking for)</h2>
+  <div id="enrolled-list"></div>
+
+  <form id="enroll-form" class="enroll-form">
+    <h3>+ Add person</h3>
+    <input id="enroll-name" type="text" placeholder="Person name (e.g. jane_doe)" required>
+    <input id="enroll-photos" type="file" accept="image/*" multiple required>
+    <button type="submit">Upload &amp; Enroll</button>
+    <div id="enroll-result" class="result"></div>
+  </form>
+</section>
+
+<section class="gallery-pane">
+  <h2>Found People — Face Gallery</h2>
+  <div class="gallery-controls">
+    <label>Filter:
+      <select id="gallery-filter"><option value="">All people</option></select>
+    </label>
+  </div>
+  <div id="gallery"></div>
+</section>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

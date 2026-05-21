@@ -1,1 +1,10 @@
 .venv
+.env
+.claude/
+__pycache__/
+embeddings.pkl
+logs/detections_*.csv
+logs/crops/*
+!logs/crops/.gitkeep
+dashboard/captures/
+dashboard/config.json
