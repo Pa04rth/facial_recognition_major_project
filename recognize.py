@@ -13,17 +13,9 @@ from datetime import datetime
 import cv2
 
 import config
+from camera import open_camera
 from db import EmbeddingDB
 from engine import Engine
-
-
-def open_camera():
-    cap = cv2.VideoCapture(config.CAMERA_INDEX, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        cap = cv2.VideoCapture(config.CAMERA_INDEX)
-    if not cap.isOpened():
-        raise RuntimeError(f"Could not open camera index {config.CAMERA_INDEX}")
-    return cap
 
 
 def main():
@@ -43,7 +35,8 @@ def main():
     log = csv.writer(log_file)
     log.writerow(["timestamp", "name", "score", "x1", "y1", "x2", "y2", "crop_file"])
 
-    cap = open_camera()
+    cap = open_camera(config.CAMERA_INDEX)
+    print(f"[camera] backend = {cap.backend}")
     frame_idx = 0
     fps_t0 = time.time()
     fps_n = 0

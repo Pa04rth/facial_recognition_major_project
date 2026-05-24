@@ -33,6 +33,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 import numpy as np
 
 import config
+from camera import open_camera
 from db import EmbeddingDB
 from engine import Engine
 
@@ -83,15 +84,6 @@ engine: Engine | None = None
 inference_stats = {"fps": 0.0, "frames": 0, "matches": 0, "started_at": time.time()}
 
 
-def open_camera():
-    cap = cv2.VideoCapture(config.CAMERA_INDEX, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        cap = cv2.VideoCapture(config.CAMERA_INDEX)
-    if not cap.isOpened():
-        raise RuntimeError(f"Could not open camera index {config.CAMERA_INDEX}")
-    return cap
-
-
 def broadcast_event(payload: dict):
     """Called from the inference thread; schedules send on the asyncio loop."""
     if main_loop is None:
@@ -111,7 +103,8 @@ def inference_loop():
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(["timestamp", "name", "score", "x1", "y1", "x2", "y2", "crop_file"])
 
-    cap = open_camera()
+    cap = open_camera(config.CAMERA_INDEX)
+    print(f"[camera] backend = {cap.backend}")
     fps_t0 = time.time()
     fps_n = 0
     fps_display = 0.0
